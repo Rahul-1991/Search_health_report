@@ -8,3 +8,4 @@ class Config(object):
     required_fields = ['totalProducts', 'entity_id', 'relevance_score', '_score',
                        'price', 'discounted_price', 'vendor_name', 'image']
     output_file = str(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+    perPage = 100

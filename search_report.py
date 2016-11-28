@@ -14,7 +14,7 @@ class SearchReport(object):
     @staticmethod
     def get_products_for_keyword(keyword):
         url = Config.search_url
-        query_params = {'search': keyword, 'perPage': 100}
+        query_params = {'search': keyword, 'perPage': Config.perPage}
         response = requests.post(url, json=query_params)
         return response.json().get('data', {})
 
