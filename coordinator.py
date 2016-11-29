@@ -9,7 +9,6 @@ class Coordinator(object):
         return base_url + path
 
     def post(self, path, payload={}, headers={}):
-        print payload
         response = requests.post(
             self.action(path), json=payload, headers=headers)
         return response

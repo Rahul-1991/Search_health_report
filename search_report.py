@@ -16,13 +16,24 @@ class SearchReport(object):
     @staticmethod
     def get_info_from_search(product_lite):
         required_fields = Config.search_fields
-        return [product_lite.get(field, None) for field in required_fields]
+        return [str(product_lite.get(field, None)) for field in required_fields]
 
     def get_info_from_pdp(self, product_lite):
         required_fields = Config.pdp_fields
         product_id = product_lite.get('entity_id')
         product_info = self.play_service.get_product_detail(product_id)
-        return [product_info.get(field, None) for field in required_fields]
+        field_info = list()
+        for field in required_fields:
+            if field == 'attributes':
+                field_info.append(str(product_info.get(field, [])))
+                field_info.append(str(len(product_info.get(field, []))))
+            elif field == 'gallery_images':
+                field_info.append(str(len(product_info.get(field, '').strip(',').split(','))))
+            elif field == 'category_name':
+                field_info.append(str(product_info.get(field, [])[-2:]))
+            else:
+                field_info.append(str(product_info.get(field, None)))
+        return field_info
 
     def get_required_fields(self, keyword):
         product_info_list = list()
@@ -32,7 +43,6 @@ class SearchReport(object):
             product.update({'totalProducts': self.search_products.get('totalProducts', 0),
                             'keyword': keyword})
             search_fields = self.get_info_from_search(product)
-            print search_fields
             pdp_fields = self.get_info_from_pdp(product)
             product_info_list.append(search_fields + pdp_fields)
         return product_info_list
