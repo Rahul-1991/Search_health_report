@@ -27,7 +27,6 @@ class PlayService(object):
         formatted_data = [line.strip().split('\t') for line in analytics_data]
         return formatted_data
 
-    @property
     def get_info_by_product(self):
         product_info = dict()
         for data in self.formatted_data:
