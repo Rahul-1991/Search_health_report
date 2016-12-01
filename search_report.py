@@ -1,6 +1,8 @@
 from config import Config
 from service import PlayService
 
+ORDER_COLUMN = 2
+VISITS_COLUMN = 4
 
 class SearchReport(object):
 
@@ -12,6 +14,22 @@ class SearchReport(object):
 
     def _get_keyword_list(self):
         return [keyword.strip() for keyword in self.read_file_handle]
+
+    def _get_info_for_product(self, product_info, column):
+        if not product_info[0]:
+            return '0'
+        sum = 0
+        for info in product_info:
+            sum += int(info[column])
+        return str(sum)
+
+    def get_info_from_redshift(self, product):
+        product_id = product.get('entity_id')
+        product_info = self.play_service.get_info_by_product.get(str(product_id), [[]])
+        total_orders = self._get_info_for_product(product_info, ORDER_COLUMN)
+        total_visits = self._get_info_for_product(product_info, VISITS_COLUMN)
+        return [total_orders, total_visits]
+
 
     @staticmethod
     def get_info_from_search(product_lite):
@@ -44,16 +62,18 @@ class SearchReport(object):
                             'keyword': keyword})
             search_fields = self.get_info_from_search(product)
             pdp_fields = self.get_info_from_pdp(product)
-            product_info_list.append(search_fields + pdp_fields)
+            redshift_fields = self.get_info_from_redshift(product)
+            product_info_list.append(search_fields + pdp_fields + redshift_fields)
         return product_info_list
 
     def print_to_file(self, keyword_info):
         for info in keyword_info:
-            self.write_file_handle.write(','.join(info)+'\n')
+            self.write_file_handle.write('$$$'.join(info)+'\n')
 
     def main(self):
         keywords_list = self._get_keyword_list()
         for keyword in keywords_list:
+            print keyword
             fields = self.get_required_fields(keyword)
             self.print_to_file(fields)
         self.read_file_handle.close()
